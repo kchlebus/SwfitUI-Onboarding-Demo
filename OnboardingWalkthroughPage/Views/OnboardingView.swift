@@ -67,6 +67,27 @@ struct OnboardingView: View {
         }
       }
       .frame(width: size.width * CGFloat(slides.count), alignment: .leading)
+      .gesture(DragGesture(minimumDistance: 20, coordinateSpace: .global)
+        .onEnded { value in
+          let horizontalAmount = value.translation.width
+          let verticalAmount = value.translation.height
+          let isHorizontal = abs(horizontalAmount) > abs(verticalAmount)
+          let isLeft = horizontalAmount < 0
+          guard isHorizontal else { return }
+
+          pauseAnimation()
+          if isLeft {
+            if currentIndex < slides.count - 1 {
+              currentIndex += 1
+            }
+          } else {
+            if currentIndex > 0 {
+              currentIndex -= 1
+            }
+          }
+          playAnimation()
+        }
+      )
     }
   }
 }
@@ -96,7 +117,7 @@ private extension OnboardingView {
     }
     .animation(.easeOut, value: currentIndex)
     .tint(Color("Green"))
-    .fontWeight(.bold)
+    .font(.system(size: 15, weight: .bold))
   }
 
   var nextLoginButton: some View {
@@ -122,11 +143,11 @@ private extension OnboardingView {
     HStack {
       Link(destination: URL(string: "https://www.apple.com")!) {
         Text(L10n.terms)
-            .underline()
+          .underline()
       }
       Link(destination: URL(string: "https://www.apple.com")!) {
         Text(L10n.privacy)
-            .underline()
+          .underline()
       }
     }
     .tint(Color("Link"))
